@@ -1,4 +1,10 @@
 pandas
 numpy
+scikit-learn
+matplotlib
 seaborn
--e .
+xgboost
+openpyxl
+dill
+flask
+src
