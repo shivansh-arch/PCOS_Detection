@@ -1,6 +1,8 @@
 import logging
 import numpy as np
 import sys
+import pickle
+import os
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
@@ -11,7 +13,13 @@ from src.exception import CustomException
 class ModelTrainer:
 
     def __init__(self):
-        self.model = RandomForestClassifier(n_estimators=200, min_samples_split=2, max_depth=None, max_features='sqrt', andom_state=42)
+       self.model = RandomForestClassifier(
+    n_estimators=100,        # ↓ from 200
+    max_depth=20,           # limit tree depth
+    min_samples_split=5,    # prevent overgrowth
+    random_state=42,
+    n_jobs=-1               # use CPU efficiently
+)
 
     def initiate_model_trainer(self, X_train, X_test, y_train, y_test):
         try:
@@ -20,6 +28,19 @@ class ModelTrainer:
             # ✅ Train model
             self.model.fit(X_train, y_train)
             logging.info("Model training completed")
+            
+            os.makedirs("artifacts", exist_ok=True)
+
+            with open("artifacts/model.pkl", "wb") as f:
+                pickle.dump(self.model, f)
+
+            logging.info("Model saved successfully")
+
+            # 🔥 SAVE FEATURE NAMES (ADD THIS HERE)
+            with open("artifacts/features.pkl", "wb") as f:
+                pickle.dump(X_train.columns.tolist(), f)
+
+            logging.info("Feature names saved successfully")
 
             # 🔥 Train accuracy
             y_train_pred = self.model.predict(X_train)
@@ -59,3 +80,4 @@ class ModelTrainer:
 
         except Exception as e:
             raise CustomException(e, sys)
+        
